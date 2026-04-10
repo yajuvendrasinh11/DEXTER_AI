@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DEXTER AI Chatbot – Your intelligent conversation partner with analytics and sentiment tracking." />
+  <title>DEXTER AI Chatbot</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Marked.js for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="brand-logo">🤖</div>
+    <div class="brand-info">
+      <h2 class="brand-name">DEXTER</h2>
+      <span class="brand-sub">AI Chatbot</span>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sidebar-nav" role="navigation" aria-label="Main navigation">
+    <button class="nav-item active" id="nav-chat"      data-tab="chat"      aria-selected="true">
+      <span class="nav-icon">💬</span><span class="nav-label">Chat</span>
+    </button>
+    <button class="nav-item"        id="nav-history"   data-tab="history"   aria-selected="false">
+      <span class="nav-icon">📜</span><span class="nav-label">History</span>
+    </button>
+    <button class="nav-item"        id="nav-analytics" data-tab="analytics" aria-selected="false">
+      <span class="nav-icon">📊</span><span class="nav-label">Analytics</span>
+    </button>
+    <button class="nav-item"        id="nav-settings"  data-tab="settings"  aria-selected="false">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
+    </button>
+    <button class="nav-item"        id="nav-about"     data-tab="about"     aria-selected="false">
+      <span class="nav-icon">ℹ️</span><span class="nav-label">About</span>
+    </button>
+    <a href="admin.html" class="nav-item" id="nav-admin" style="display:none; text-decoration:none;">
+      <span class="nav-icon">🛡️</span><span class="nav-label">Admin</span>
+    </a>
+  </nav>
+
+  <!-- Sidebar footer -->
+  <div class="sidebar-footer">
+    <!-- User card (shown when logged in) -->
+    <div class="sidebar-user" id="sidebar-user" style="display:none;">
+      <div class="sidebar-user-avatar" id="sidebar-avatar">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="logged-user">—</div>
+        <div class="sidebar-user-role" id="logged-role">user</div>
+      </div>
+    </div>
+    <button class="btn-clear" id="btn-clear-chat" title="Clear conversation">
+      🗑️ Clear Chat
+    </button>
+    <button class="btn-signout" id="btn-logout" title="Sign out">
+      🚪 Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- ════════════════════════════════════════════ MAIN ═══ -->
+<main class="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Toggle sidebar" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-title">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="topbar-title-text">Chat</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span id="topbar-user" style="font-size:0.78rem; color:var(--text-muted,#64748b); display:none;">👤 <span id="topbar-username"></span></span>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <!-- ── CHAT PANEL ── -->
+  <section class="panel active" id="panel-chat" aria-label="Chat">
+    <div class="messages-wrapper" id="messages-wrapper">
+      <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Chat messages">
+        <!-- Welcome message injected by JS -->
+      </div>
+    </div>
+
+    <!-- Quick replies -->
+    <div class="quick-replies" id="quick-replies">
+      <button class="quick-btn" data-text="Hello! What can you do?">👋 Hello!</button>
+      <button class="quick-btn" data-text="Tell me a fun fact.">💡 Fun Fact</button>
+      <button class="quick-btn" data-text="Help me with coding.">💻 Coding Help</button>
+      <button class="quick-btn" data-text="Tell me a joke.">😄 Joke</button>
+    </div>
+
+    <!-- Attachment Preview -->
+    <div class="attachment-preview" id="attachment-preview" style="display: none;">
+      <div class="preview-content">
+        <span class="preview-icon">📎</span>
+        <span class="preview-name" id="preview-name">file.jpg</span>
+        <button class="preview-remove" id="btn-remove-attachment" title="Remove attachment">✕</button>
+      </div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <input type="file" id="file-input" style="display: none;" accept=".png,.jpg,.jpeg,.webp,.zip" />
+      <button class="mic-btn" id="btn-attach" title="Attach Image or ZIP">📎</button>
+      <button class="mic-btn" id="btn-generate-img" title="Generate Image">✨</button>
+      <button class="mic-btn" id="btn-voice-search" title="Voice Search">🎙️</button>
+      <textarea
+        id="chat-input"
+        class="chat-input"
+        placeholder="Type your message…"
+        rows="1"
+        maxlength="2000"
+        aria-label="Chat message input"
+      ></textarea>
+      <button class="send-btn" id="send-btn" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ── HISTORY PANEL ── -->
+  <section class="panel" id="panel-history" aria-label="Search History">
+    <div class="panel-header">
+      <h2>📜 Search Activity</h2>
+      <button class="btn-secondary" id="btn-clear-permanent-history">🗑️ Clear All</button>
+    </div>
+    <div class="history-list-wrapper">
+      <div id="history-items" class="history-items">
+        <!-- History items injected by JS -->
+        <p class="history-empty">No searches yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ANALYTICS PANEL ── -->
+  <section class="panel" id="panel-analytics" aria-label="Analytics">
+    <div class="panel-header">
+      <h2>📊 Analytics Dashboard</h2>
+      <button class="btn-secondary" id="btn-refresh-analytics">↻ Refresh</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Total Messages</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-rt">0s</span>
+          <span class="stat-label">Avg Response Time</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">😊</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-pos">0</span>
+          <span class="stat-label">Positive</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">😟</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-neg">0</span>
+          <span class="stat-label">Negative</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Sentiment Breakdown</h3>
+        <div class="chart-container">
+          <canvas id="chart-sentiment" aria-label="Sentiment pie chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Messages per Sentiment</h3>
+        <div class="chart-container">
+          <canvas id="chart-bar" aria-label="Messages bar chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-danger" id="btn-reset-analytics">🗑️ Reset Analytics</button>
+  </section>
+
+  <!-- ── SETTINGS PANEL ── -->
+  <section class="panel" id="panel-settings" aria-label="Settings">
+    <div class="panel-header">
+      <h2>⚙️ Settings</h2>
+    </div>
+
+    <div class="settings-list">
+
+      <!-- Language -->
+      <div class="setting-group">
+        <label class="setting-label" for="language-select">🌐 Language</label>
+        <p class="setting-desc">Choose the language for AI responses.</p>
+        <select class="setting-select" id="language-select">
+          <option value="english">🇬🇧 English</option>
+          <option value="hindi">🇮🇳 Hindi</option>
+          <option value="hinglish">🤝 Hinglish</option>
+        </select>
+      </div>
+
+      <!-- Temperature -->
+      <div class="setting-group">
+        <label class="setting-label" for="temp-slider">🌡️ Temperature
+          <span class="setting-value" id="temp-value">0.7</span>
+        </label>
+        <p class="setting-desc">Higher = more creative; Lower = more focused.</p>
+        <input type="range" class="setting-slider" id="temp-slider"
+               min="0" max="1" step="0.1" value="0.7" />
+      </div>
+
+      <!-- Toggle: Sentiment badge -->
+      <div class="setting-group">
+        <div class="setting-row">
+          <div>
+            <span class="setting-label">😊 Show Sentiment Badge</span>
+            <p class="setting-desc">Display sentiment label on each AI reply.</p>
+          </div>
+          <label class="toggle-switch" aria-label="Toggle sentiment badge">
+            <input type="checkbox" id="toggle-sentiment" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Toggle: Timestamps -->
+      <div class="setting-group">
+        <div class="setting-row">
+          <div>
+            <span class="setting-label">🕐 Show Timestamps</span>
+            <p class="setting-desc">Show time next to every message.</p>
+          </div>
+          <label class="toggle-switch" aria-label="Toggle timestamps">
+            <input type="checkbox" id="toggle-timestamps" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Toggle: AI Voice -->
+      <div class="setting-group">
+        <div class="setting-row">
+          <div>
+            <span class="setting-label">🗣️ DEXTER Voice (TTS)</span>
+            <p class="setting-desc">DEXTER will read out its responses aloud.</p>
+          </div>
+          <label class="toggle-switch" aria-label="Toggle AI Voice">
+            <input type="checkbox" id="toggle-voice" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <button class="btn-primary" id="btn-save-settings">💾 Save Settings</button>
+    </div>
+  </section>
+
+  <!-- ── ABOUT PANEL ── -->
+  <section class="panel" id="panel-about" aria-label="About">
+    <div class="about-hero">
+      <div class="about-avatar">🤖</div>
+      <h2 class="about-title">DEXTER AI Chatbot</h2>
+      <p class="about-subtitle">Your intelligent AI companion</p>
+    </div>
+
+    <div class="about-cards">
+      <div class="about-card">
+        <span class="about-card-icon">⚡</span>
+        <h3>Powered by Gemini</h3>
+        <p>Uses Google's Gemini 1.5 Flash model for fast, accurate, and nuanced responses.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-card-icon">🧠</span>
+        <h3>Context Memory</h3>
+        <p>Remembers your entire conversation so responses are coherent and contextual.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-card-icon">📊</span>
+        <h3>Sentiment Analysis</h3>
+        <p>Analyses the sentiment of every message using VADER NLP, tracking your mood over time.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-card-icon">🌐</span>
+        <h3>Multi-Language</h3>
+        <p>Responds in English, Hindi, or Hinglish based on your preference.</p>
+      </div>
+    </div>
+
+    <div class="about-tech">
+      <h3>Tech Stack</h3>
+      <div class="tech-tags">
+        <span class="tech-tag">Python</span>
+        <span class="tech-tag">Flask</span>
+        <span class="tech-tag">Gemini API</span>
+        <span class="tech-tag">HTML5</span>
+        <span class="tech-tag">CSS3</span>
+        <span class="tech-tag">JavaScript</span>
+        <span class="tech-tag">Chart.js</span>
+        <span class="tech-tag">VADER NLP</span>
+      </div>
+    </div>
+
+    <p class="about-footer">Built with ❤️ by DEXTER &nbsp;•&nbsp; v1.0.0</p>
+  </section>
+
+</main>
+
+<!-- Overlay for mobile sidebar -->
+<div class="overlay" id="overlay"></div>
+
+<script src="settings.js"></script>
+<script src="analytics.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

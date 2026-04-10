@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-login
+google-genai
+python-dotenv
+vaderSentiment
+requests==2.31.0
+werkzeug
+pillow
