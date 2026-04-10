@@ -121,4 +121,4 @@ Internal Project - All Rights Reserved. (Or MIT if you prefer).
 
 ---
 
-Built with ❤️ by **YAJUVENDRASINH GOHIL** & **DEXTER AI**
+Built with ❤️ by  **DEXTER AI TEAM**
